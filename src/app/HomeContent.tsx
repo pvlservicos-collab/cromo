@@ -409,7 +409,7 @@ export default function HomeContent({ checkoutUrl, price }: { checkoutUrl?: stri
       {appStep === "loading-generate" && (
         <LoadingScreen
           title="GENERANDO TU FIGURITA"
-          gifUrl="https://media.giphy.com/media/rEug7UFYzpvP2/giphy.gif"
+          gifUrl="/sorteio.webp"
           longWait
           startTime={genStartTime}
         />
