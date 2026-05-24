@@ -62,6 +62,7 @@ function sanitizeInput(value: string, maxLen: number): string {
 function getOpenAIKeys(): string[] {
   const keys: string[] = [];
   if (process.env.OPENAI_API_KEY)   keys.push(process.env.OPENAI_API_KEY);
+  if (process.env.OPENAI_API_KEY2)  keys.push(process.env.OPENAI_API_KEY2);
   if (process.env.OPENAI_API_KEY_2) keys.push(process.env.OPENAI_API_KEY_2);
   if (process.env.OPENAI_API_KEY_3) keys.push(process.env.OPENAI_API_KEY_3);
   if (process.env.OPENAI_API_KEY_4) keys.push(process.env.OPENAI_API_KEY_4);
