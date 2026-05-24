@@ -385,7 +385,7 @@ export default function HomeContent({ checkoutUrl, price }: { checkoutUrl?: stri
       {appStep === "loading-photo" && (
         <LoadingScreen
           title="CARGANDO FOTO"
-          gifUrl="https://media4.giphy.com/media/WxDZ77xhPXf3i/giphy.gif"
+          gifUrl="https://media.giphy.com/media/qp61kl8rdZwuQ/giphy.gif"
         />
       )}
 
