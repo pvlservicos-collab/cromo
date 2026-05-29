@@ -13,8 +13,8 @@ export default function Hero({ onStart }: HeroProps) {
         className="text-[1.9rem] sm:text-[2.85rem] md:text-[3.42rem] lg:text-[3.42rem] font-normal leading-[1.32] mb-1 w-full max-w-2xl"
         style={{ fontFamily: "var(--font-titulo)" }}
       >
-        Convertí a tu hijo en un{" "}
-        <span style={{ color: "#003087" }}>álbum personalizado</span> del Mundial
+        Convertí a tu hijo en una{" "}
+        <span style={{ color: "#003087" }}>figurita personalizada</span> del Mundial
       </h1>
 
       <div className="relative w-[260px] h-[260px] sm:w-80 sm:h-80 md:w-96 md:h-[340px] mb-2 md:mb-10 -mt-4 md:-mt-3">
@@ -89,8 +89,8 @@ export default function Hero({ onStart }: HeroProps) {
         className="text-lg md:text-xl max-w-md mb-5 leading-[1.2] md:leading-relaxed mt-8 md:mt-5"
         style={{ fontFamily: "var(--font-papernotes)" }}
       >
-        Respondé algunas preguntas rápidas y mirá cómo crear una figurita exclusiva,
-        con el nombre, foto y estilo de tu pequeño crack.
+        Con su nombre, su foto y el diseño de una verdadera figurita de colección.
+        Respondé unas preguntas y descubrí cómo quedaría tu pequeño campeón.
       </p>
 
       <button
@@ -100,7 +100,7 @@ export default function Hero({ onStart }: HeroProps) {
           cursor-pointer tracking-[0.15em]"
         style={{ fontFamily: "var(--font-titulo)" }}
       >
-        EMPEZAR
+        CREAR MI FIGURITA
       </button>
 
       <div className="mt-2 flex flex-col items-center gap-2">
