@@ -1,5 +1,5 @@
 import HomeContent from "../HomeContent";
 
 export default function PageB() {
-  return <HomeContent checkoutUrl="https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HU" price="AR$9.900" />;
+  return <HomeContent checkoutUrl="https://pay.hotmart.com/T106028174P?checkoutMode=10" price="AR$9.900" />;
 }

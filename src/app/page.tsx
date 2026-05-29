@@ -1,5 +1,5 @@
 import HomeContent from "./HomeContent";
 
 export default function Home() {
-  return <HomeContent checkoutUrl="https://pay.cakto.com.br/oga99on_896469" />;
+  return <HomeContent checkoutUrl="https://pay.hotmart.com/T106028174P?checkoutMode=10" />;
 }
