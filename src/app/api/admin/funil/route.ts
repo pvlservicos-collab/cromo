@@ -21,7 +21,24 @@ export async function GET(req: NextRequest) {
 
   const sql = getDb();
   try {
-    try { await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS oferta VARCHAR(10)`; } catch { /* ok */ }
+    try {
+      await sql`
+        CREATE TABLE IF NOT EXISTS sessions (
+          id SERIAL PRIMARY KEY,
+          session_id VARCHAR(100) UNIQUE NOT NULL,
+          email VARCHAR(255),
+          nome VARCHAR(100),
+          step VARCHAR(50) NOT NULL,
+          cta_clicked BOOLEAN DEFAULT FALSE,
+          obrigado BOOLEAN DEFAULT FALSE,
+          oferta VARCHAR(20),
+          created_at TIMESTAMP DEFAULT NOW(),
+          updated_at TIMESTAMP DEFAULT NOW()
+        )
+      `;
+      await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS oferta VARCHAR(20)`;
+      await sql`ALTER TABLE sessions ALTER COLUMN oferta TYPE VARCHAR(20)`;
+    } catch { /* ok */ }
 
     const { searchParams } = new URL(req.url);
     const period = searchParams.get("period") || "today";

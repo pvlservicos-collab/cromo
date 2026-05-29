@@ -14,8 +14,23 @@ export async function POST(req: NextRequest) {
     const validOferta = (oferta === "a" || oferta === "b" || oferta === "segunda" || oferta === "pets") ? oferta : null;
 
     const sql = getDb();
-    // Lazy migration — cria coluna se não existir (idempotente)
-    await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS oferta VARCHAR(10)`.catch(() => {});
+    // Lazy migration — cria tabela e coluna se não existirem (idempotente)
+    await sql`
+      CREATE TABLE IF NOT EXISTS sessions (
+        id SERIAL PRIMARY KEY,
+        session_id VARCHAR(100) UNIQUE NOT NULL,
+        email VARCHAR(255),
+        nome VARCHAR(100),
+        step VARCHAR(50) NOT NULL,
+        cta_clicked BOOLEAN DEFAULT FALSE,
+        obrigado BOOLEAN DEFAULT FALSE,
+        oferta VARCHAR(20),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      )
+    `.catch(() => {});
+    await sql`ALTER TABLE sessions ADD COLUMN IF NOT EXISTS oferta VARCHAR(20)`.catch(() => {});
+    await sql`ALTER TABLE sessions ALTER COLUMN oferta TYPE VARCHAR(20)`.catch(() => {});
     const isCta = step === "checkout";
     const isObrigado = step === "obrigado";
 
