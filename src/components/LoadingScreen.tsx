@@ -11,24 +11,33 @@ interface LoadingScreenProps {
 }
 
 const curiosidades = [
-  "¿Sabías? La Copa 2026 será la primera con 48 selecciones. ¡Va a ser histórica!",
-  "¿Sabías? Argentina es tricampeona mundial: 1978, 1986 y 2022. ¡Los campeones del mundo!",
-  "¿Sabías? Lionel Messi tiene 8 Balones de Oro, el récord absoluto en la historia.",
-  "¿Sabías? La primera Copa del Mundo fue en 1930, en Uruguay.",
-  "¿Sabías? El récord de goles en un Mundial es de Just Fontaine: 13 goles en 1958.",
-  "¿Sabías? Messi es el máximo goleador histórico de la Selección Argentina con más de 109 goles.",
-  "¿Sabías? El Monumental de River Plate es el estadio más grande de Argentina.",
-  "¿Sabías? La Copa 2026 se disputará en EE.UU., México y Canadá.",
-  "¿Sabías? El gol más rápido en la historia de los Mundiales fue a los 10,8 segundos.",
-  "¿Sabías? Argentina ganó el Mundial 2022 en Qatar con una final épica ante Francia.",
-  "¿Sabías? Miroslav Klose es el máximo goleador histórico de los Mundiales con 16 goles.",
-  "¿Sabías? Argentina es la única selección que ganó Copa del Mundo y Copa América invicta en 2021.",
-  "¿Sabías? La camiseta celeste y blanca de Argentina tiene más de 100 años de historia.",
-  "¿Sabías? Diego Maradona marcó el 'Gol del Siglo' contra Inglaterra en México 1986.",
-  "¿Sabías? La Bombonera, estadio de Boca Juniors, es famosa por su tribuna que vibra.",
-  "¿Sabías? Ángel Di María anotó el gol decisivo en la final del Mundial 2022.",
-  "¿Sabías? Daniel Passarella fue el capitán del primer Mundial ganado por Argentina en 1978.",
-  "¿Sabías? El estadio Azteca en México es el único que albergó dos finales de Mundial.",
+  "Sabias? O Mundial 2026 será o primeiro com 48 seleções. Vai ser histórico!",
+  "Sabias? Portugal é campeão da Europa desde 2016, com uma vitória épica sobre a França!",
+  "Sabias? Cristiano Ronaldo tem mais de 120 golos pela Seleção Nacional, um recorde mundial!",
+  "Sabias? O primeiro Mundial foi em 1930, no Uruguai.",
+  "Sabias? O recorde de golos num Mundial pertence a Just Fontaine: 13 golos em 1958.",
+  "Sabias? Portugal alcançou o 3.º lugar no Mundial de 1966 com o lendário Eusébio.",
+  "Sabias? O Estádio da Luz tem capacidade para mais de 64.000 espetadores.",
+  "Sabias? O Mundial 2026 vai disputar-se nos EUA, México e Canadá.",
+  "Sabias? O golo mais rápido da história dos Mundiais foi marcado aos 10,8 segundos.",
+  "Sabias? Portugal venceu o Euro 2016 em Paris, batendo a França na final.",
+  "Sabias? Miroslav Klose é o maior goleador histórico dos Mundiais com 16 golos.",
+  "Sabias? Portugal esteve presente nos últimos 5 Mundiais consecutivos.",
+  "Sabias? A camisola vermelha de Portugal tem mais de 100 anos de história.",
+  "Sabias? Eusébio foi o melhor marcador do Mundial de 1966, com 9 golos.",
+  "Sabias? O Estádio do Dragão, casa do FC Porto, foi inaugurado em novembro de 2003.",
+  "Sabias? Portugal venceu a primeira Liga das Nações da UEFA em 2019.",
+  "Sabias? Bruno Fernandes é o capitão atual da Seleção Nacional de Portugal.",
+  "Sabias? O FC Porto venceu a Liga dos Campeões em 1987 e 2004.",
+  "Sabias? Cristiano Ronaldo marcou golos em 5 Mundiais diferentes, um recorde único.",
+  "Sabias? A Seleção Nacional é conhecida como os 'Navegadores', em homenagem aos descobrimentos.",
+  "Sabias? Luís Figo foi eleito melhor jogador do mundo pela FIFA em 2001.",
+  "Sabias? No Mundial de 2022, Portugal eliminou a Suíça com um hat-trick de Gonçalo Ramos.",
+  "Sabias? Portugal e Espanha vão coorganizar o Mundial de 2030.",
+  "Sabias? O Benfica é o clube com mais títulos nacionais em Portugal.",
+  "Sabias? O Sporting CP, fundado em 1906, é um dos clubes mais antigos de Portugal.",
+  "Sabias? Diogo Jota, João Félix e Rafael Leão são as grandes esperanças da nova geração portuguesa.",
+  "Sabias? Portugal venceu a Liga das Nações de 2019, realizada em solo português.",
 ];
 
 export default function LoadingScreen({ title, gifUrl, longWait, startTime }: LoadingScreenProps) {
@@ -87,7 +96,7 @@ export default function LoadingScreen({ title, gifUrl, longWait, startTime }: Lo
   }, [longWait]);
 
   return (
-    <section className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4" style={{ background: "#74ACDF" }}>
+    <section className="flex flex-col items-center justify-center min-h-[100dvh] w-full px-4" style={{ background: "#006600" }}>
       <div className="w-full max-w-md bg-copa-white rounded-3xl shadow-2xl p-8 flex flex-col items-center gap-6 animate-slide-up">
         <h2
           className="text-3xl md:text-4xl font-bold text-copa-blue tracking-[0.1em] text-center"
@@ -98,27 +107,27 @@ export default function LoadingScreen({ title, gifUrl, longWait, startTime }: Lo
 
         {longWait && (
           <p className="text-sm font-bold text-copa-blue text-center -mt-4" style={{ fontFamily: "var(--font-papernotes)" }}>
-            No cierres esta pantalla, puede tardar hasta 2 minutos.
+            Não feches este ecrã, pode demorar até 2 minutos.
           </p>
         )}
 
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src="https://media.giphy.com/media/qp61kl8rdZwuQ/giphy.gif"
-          alt="Messi"
+          alt="Ronaldo"
           style={{ height: 260, width: "auto", borderRadius: 16, objectFit: "cover", display: "block" }}
         />
 
         {longWait && (
           <div className="text-center leading-snug">
             <p className="text-base font-bold text-copa-blue" style={{ fontFamily: "var(--font-papernotes)" }}>
-              ¡Conseguí tu figurita HOY y participá por un ingreso a la Copa!
+              Obtém o teu cromo HOJE e participa num ingresso para o Mundial!
             </p>
             <p className="text-4xl font-black text-copa-green my-1" style={{ fontFamily: "var(--font-titulo)" }}>
-              Copa del Mundo 2026
+              Copa do Mundo 2026
             </p>
             <p className="text-sm text-copa-blue mt-2" style={{ fontFamily: "var(--font-papernotes)" }}>
-              Sorteo el 11/06/2026, inicio de la Copa.
+              Sorteio a 11/06/2026, início do Mundial.
             </p>
           </div>
         )}
@@ -130,14 +139,14 @@ export default function LoadingScreen({ title, gifUrl, longWait, startTime }: Lo
           {longWait ? (
             <span className="text-copa-blue font-bold">{curiosidades[curiosidadeIndex]}</span>
           ) : (
-            "¡Este es un crack!"
+            "Este é um craque!"
           )}
         </p>
 
         <div className="w-full">
           <div className="flex justify-between items-center mb-1">
             <span className="text-xs font-bold text-copa-blue" style={{ fontFamily: "var(--font-papernotes)" }}>
-              {"Cargando..."}
+              {"A carregar..."}
             </span>
             <span className="text-sm font-bold text-copa-blue" style={{ fontFamily: "var(--font-papernotes)" }}>
               {percent}%

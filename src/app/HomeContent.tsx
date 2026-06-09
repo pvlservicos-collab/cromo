@@ -45,7 +45,7 @@ const initialData: QuizData = {
 type AppStep = "hero" | "quiz-1" | "loading-photo" | "quiz-2" | "quiz-3" | "confirm" | "loading-generate" | "result";
 
 const SEGUNDA_CHECKOUT = "https://pay.hotmart.com/T106028174P?checkoutMode=10";
-const SEGUNDA_PRICE = "$3.500";
+const SEGUNDA_PRICE = "�3,90";
 
 export default function HomeContent({ checkoutUrl, price, oferta: ofertaProp }: { checkoutUrl?: string; price?: string; oferta?: string }) {
   const isSegunda = typeof window !== "undefined" && !!new URLSearchParams(window.location.search).get("start");
@@ -256,7 +256,7 @@ export default function HomeContent({ checkoutUrl, price, oferta: ofertaProp }: 
       try {
         wakeLock = await navigator.wakeLock.request("screen");
       } catch {
-        // Wake Lock não suportado ou negado
+        // Wake Lock n�o suportado ou negado
       }
     };
     requestWakeLock();
@@ -365,7 +365,7 @@ export default function HomeContent({ checkoutUrl, price, oferta: ofertaProp }: 
   }, [quizStep]);
 
   return (
-    <main className="flex flex-col items-center min-h-screen bg-[#74ACDF]">
+    <main className="flex flex-col items-center min-h-screen bg-[#006600]">
       {appStep === "hero" && (
         <Hero
           onStart={() => {
@@ -390,7 +390,7 @@ export default function HomeContent({ checkoutUrl, price, oferta: ofertaProp }: 
 
       {appStep === "loading-photo" && (
         <LoadingScreen
-          title="CARGANDO FOTO"
+          title="A CARREGAR FOTO"
           gifUrl="https://media.giphy.com/media/qp61kl8rdZwuQ/giphy.gif"
         />
       )}
@@ -415,7 +415,7 @@ export default function HomeContent({ checkoutUrl, price, oferta: ofertaProp }: 
 
       {appStep === "loading-generate" && (
         <LoadingScreen
-          title="GENERANDO TU FIGURITA"
+          title="A GERAR O TEU CROMO"
           gifUrl="/sorteio.webp"
           longWait
           startTime={genStartTime}

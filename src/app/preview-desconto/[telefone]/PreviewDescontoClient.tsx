@@ -95,7 +95,7 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
   return (
     <section
       className="flex flex-col items-center min-h-[100dvh] w-full px-4 py-8 justify-center"
-      style={{ background: "#FFDF00", userSelect: "none", WebkitUserSelect: "none" }}
+      style={{ background: "#006600", userSelect: "none", WebkitUserSelect: "none" }}
     >
       <div className="flex flex-col items-center w-full max-w-sm animate-slide-up">
 
@@ -103,14 +103,14 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
         <div className="w-full px-1 mb-5">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-sm font-bold text-copa-blue" style={{ fontFamily: "var(--font-papernotes)" }}>
-              Você já criou sua figurinha 🔥
+              Já criaste o teu cromo 🔥
             </span>
             <span className="text-sm font-black text-copa-green" style={{ fontFamily: "var(--font-titulo)" }}>95%</span>
           </div>
-          <div className="w-full rounded-full h-1.5 overflow-hidden" style={{ background: "rgba(0,35,149,0.15)" }}>
+          <div className="w-full rounded-full h-1.5 overflow-hidden" style={{ background: "rgba(200,16,46,0.15)" }}>
             <div className="h-1.5 rounded-full transition-all duration-700" style={{ width: "95%", background: "linear-gradient(90deg, #009C3B, #00c94d)" }} />
           </div>
-          <p className="text-xs mt-1 text-right" style={{ fontFamily: "var(--font-papernotes)", color: "rgba(0,35,149,0.5)" }}>só falta confirmar</p>
+          <p className="text-xs mt-1 text-right" style={{ fontFamily: "var(--font-papernotes)", color: "rgba(255,255,255,0.6)" }}>só falta confirmar</p>
         </div>
 
         {/* Preview da figurinha */}
@@ -123,7 +123,7 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={imageUrl}
-                alt={nome ? `Figurinha de ${nome}` : "Figurinha personalizada"}
+                alt={nome ? `Cromo de ${nome}` : "Cromo personalizado"}
                 className="w-full aspect-[2/3] object-cover"
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
@@ -138,7 +138,7 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
                     </p>
                     <p className="text-white text-[9px] font-bold tracking-widest whitespace-nowrap mt-1"
                       style={{ fontFamily: "var(--font-papernotes)", textShadow: "1px 1px 3px rgba(0,0,0,0.3)", opacity: 0.35 }}>
-                      minha-figurinha-copa2026 &nbsp;&nbsp; minha-figurinha-copa2026 &nbsp;&nbsp; minha-figurinha-copa2026
+                      meu-cromo-copa2026 &nbsp;&nbsp; meu-cromo-copa2026 &nbsp;&nbsp; meu-cromo-copa2026
                     </p>
                   </div>
                 ))}
@@ -148,7 +148,7 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
           ) : (
             <div
               className="w-full aspect-[2/3] animate-pulse"
-              style={{ background: "rgba(0,35,149,0.12)" }}
+              style={{ background: "rgba(200,16,46,0.12)" }}
             />
           )}
         </div>
@@ -158,26 +158,26 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
           className="text-6xl md:text-8xl text-copa-blue text-center tracking-[0.1em] mb-1"
           style={{ fontFamily: "var(--font-titulo)", fontWeight: 400 }}
         >
-          GOOLL!
+          GOLOOO!
         </h1>
 
-        <p className="text-lg md:text-xl text-copa-blue text-center font-bold mb-2" style={{ fontFamily: "var(--font-papernotes)" }}>
-          Sua figurinha está pronta!
+        <p className="text-lg md:text-xl text-white text-center font-bold mb-2" style={{ fontFamily: "var(--font-papernotes)" }}>
+          O teu cromo está pronto!
         </p>
 
-        <p className="text-base text-gray-600 text-center mb-4" style={{ fontFamily: "var(--font-papernotes)" }}>
-          Adquira sua figurinha HOJE e concorra a um ingresso para a Copa!<br />Sorteo el 11/06/2026
+        <p className="text-base text-green-100 text-center mb-4" style={{ fontFamily: "var(--font-papernotes)" }}>
+          Obtém o teu cromo HOJE e participa num ingresso para o Mundial!<br />Sorteio a 11/06/2026
         </p>
 
         {/* Preço com desconto */}
-        <p className="text-lg text-gray-400 line-through text-center" style={{ fontFamily: "'Montserrat', Arial Black, sans-serif", fontWeight: 900 }}>
-          R$12,90
+        <p className="text-lg text-gray-300 line-through text-center" style={{ fontFamily: "'Montserrat', Arial Black, sans-serif", fontWeight: 900 }}>
+          €3,90
         </p>
         <p
           className="text-5xl md:text-6xl text-copa-green text-center mb-6 relative inline-block shine-effect"
           style={{ fontFamily: "'Montserrat', Arial Black, sans-serif", fontWeight: 900 }}
         >
-          R$7,90
+          €2,90
         </p>
 
         <button
@@ -186,22 +186,22 @@ export default function PreviewDescontoClient({ imageUrl, nome, stickerId }: Pro
             active:scale-95 transition-all duration-200 cursor-pointer tracking-[0.15em] relative overflow-hidden"
           style={{
             fontFamily: "var(--font-titulo)",
-            background: "linear-gradient(135deg, #002395 0%, #0040CC 50%, #002395 100%)",
-            boxShadow: "0 6px 24px rgba(0,35,149,0.45), inset 0 1px 0 rgba(255,255,255,0.15)",
+            background: "linear-gradient(135deg, #00CC44 0%, #009933 50%, #006600 100%)",
+            boxShadow: "0 6px 24px rgba(0,153,51,0.45), inset 0 1px 0 rgba(255,255,255,0.15)",
           }}
         >
           <span className="relative z-10 flex items-center justify-center gap-2">
-            ⚽ RECEBER MINHA FIGURINHA
+            ⚽ RECEBER O MEU CROMO
           </span>
         </button>
 
-        <p className="text-sm text-gray-600 text-center mt-3" style={{ fontFamily: "var(--font-papernotes)" }}>
+        <p className="text-sm text-green-100 text-center mt-3" style={{ fontFamily: "var(--font-papernotes)" }}>
           ✅ Inclui download em alta qualidade
         </p>
 
         <div className="w-full mt-6">
-          <p className="text-xs text-center mb-2 font-bold tracking-widest uppercase" style={{ fontFamily: "var(--font-papernotes)", color: "rgba(0,35,149,0.5)" }}>
-            Últimas figurinhas geradas
+          <p className="text-xs text-center mb-2 font-bold tracking-widest uppercase" style={{ fontFamily: "var(--font-papernotes)", color: "rgba(255,255,255,0.6)" }}>
+            Últimos cromos gerados
           </p>
           <FigurinhasCarousel />
         </div>

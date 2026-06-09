@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Tu Figurita Panini del Mundial 2026 | Creá la tuya",
+  title: "O Teu Cromo Panini do Mundial 2026 | Cria o teu agora",
   description:
-    "¡Creá tu figurita Panini personalizada del Mundial 2026! Tu foto con el estilo de los campeones. Archivo digital.",
+    "Cria o teu cromo Panini personalizado do Mundial 2026! A tua foto com o estilo dos campe�es. Ficheiro digital.",
   robots: "index, follow",
   openGraph: {
-    title: "Tu Figurita Panini del Mundial 2026",
-    description: "¡Creá tu figurita Panini personalizada del Mundial 2026!",
+    title: "O Teu Cromo Panini do Mundial 2026",
+    description: "Cria o teu cromo Panini personalizado do Mundial 2026!",
     type: "website",
   },
 };
@@ -19,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es-AR" className="h-full antialiased">
+    <html lang="pt-PT" className="h-full antialiased">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -186,7 +186,7 @@ INSTRUCTIONS:
 
 1. REMOVE the adult athlete from Image 2 entirely.
 
-2. GENERATE a chest-up portrait of the subject wearing the light blue and white Argentina 2026 national team jersey (light blue body #74ACDF, white stripes, AFA badge on left chest), facing forward, arms down.
+2. GENERATE a chest-up portrait of the subject wearing the red Portugal 2026 national team jersey (red body #C8102E, green accents, FPF badge on left chest), facing forward, arms down.
 
    BODY PROPORTIONS — CRITICAL:
    - Use the subject's FACE from Image 1 as your scale anchor. The shoulders, torso, and jersey must be sized to fit that face naturally.
