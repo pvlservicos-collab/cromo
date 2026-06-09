@@ -4,36 +4,21 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { track } from "@/lib/track";
 
-async function fetchWithRetry(url: string, attempts = 3): Promise<Response> {
-  for (let i = 0; i < attempts; i++) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return res;
-      if (res.status === 404) throw new Error("not_found");
-    } catch (e) {
-      if (e instanceof Error && e.message === "not_found") throw e;
-    }
-    if (i < attempts - 1) await new Promise((r) => setTimeout(r, 800 * (i + 1)));
-  }
-  throw new Error("Falhou após tentativas");
-}
-
-
 const FAQ_ITEMS = [
   {
     q: "¿Cuándo voy a recibir mi figurita?",
-    a: "Tu figurita se genera automáticamente en esta página y si no aparece también podés descargarla acá poniendo tu número en el formulario.",
-  },
-  {
-    q: "Comprei mais de 1 produto",
-    a: "Use o bloco '¿Compraste más de 1 producto?' abaixo, digite seu número e acesse a área de entregáveis com todos os seus produtos.",
+    a: "Tu figurita se genera automáticamente y podés acceder a ella desde el área de entregables con tu número de WhatsApp.",
   },
   {
     q: "¿Cómo descargo mi figurita?",
-    a: "Hacé clic en el botón '⬇ DESCARGAR MI FIGURITA' que aparece debajo de la imagen. El archivo se guardará en tu celular o computadora.",
+    a: "Ingresá tu número abajo, accedé al área de entregables y hacé clic en '⬇ Descargar PNG'.",
   },
   {
-    q: "Posso usar em qualquer álbum?",
+    q: "Compré más de 1 producto",
+    a: "Ingresá tu número en el formulario de abajo para acceder al área de entregables con todos tus productos.",
+  },
+  {
+    q: "¿La figurita es digital o física?",
     a: "Tu figurita es una imagen digital (PNG) lista para compartir por WhatsApp, redes sociales o imprimir en casa.",
   },
 ];
@@ -43,7 +28,6 @@ function FaqBubble() {
   const [expanded, setExpanded] = useState<number | null>(null);
   const [labelVisible, setLabelVisible] = useState(false);
 
-  // Balão "¿Alguna duda?" aparece após 8s e some após 6s
   useEffect(() => {
     const show = setTimeout(() => setLabelVisible(true), 8000);
     const hide = setTimeout(() => setLabelVisible(false), 14000);
@@ -52,9 +36,7 @@ function FaqBubble() {
 
   return (
     <>
-      {/* Floating button */}
       <div style={{ position: "fixed", bottom: 24, right: 20, zIndex: 1000, display: "flex", alignItems: "center", gap: 12 }}>
-        {/* Label bubble */}
         {labelVisible && !open && (
           <div style={{
             background: "#fff", color: "#002395", fontWeight: 700, fontSize: 13,
@@ -84,7 +66,7 @@ function FaqBubble() {
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src="/fotosuporte.png"
-                alt="Suporte"
+                alt="Soporte"
                 style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
             )}
@@ -99,7 +81,6 @@ function FaqBubble() {
         </div>
       </div>
 
-      {/* FAQ panel */}
       {open && (
         <div style={{
           position: "fixed", bottom: 140, right: 20, zIndex: 999,
@@ -109,7 +90,7 @@ function FaqBubble() {
           overflow: "hidden", animation: "slideUp .25s ease",
         }}>
           <div style={{ background: "linear-gradient(135deg, #002395, #0040cc)", padding: "16px 20px" }}>
-            <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0 }}>Perguntas frequentes</p>
+            <p style={{ color: "#fff", fontWeight: 800, fontSize: 15, margin: 0 }}>Preguntas frecuentes</p>
             <p style={{ color: "rgba(255,255,255,.65)", fontSize: 12, margin: "2px 0 0" }}>Respuestas rápidas para vos</p>
           </div>
           <div style={{ padding: "8px 0", maxHeight: 340, overflowY: "auto" }}>
@@ -151,129 +132,51 @@ function FaqBubble() {
 export default function Obrigado() {
   const router = useRouter();
 
-  // — Figurinha —
-  const [stickerUrl, setStickerUrl]     = useState<string | null>(null);
-  const [stickerLoading, setStickerLoading] = useState(true);
-
-  // — Buscar figurinha por telefone —
-  const [searchPhone, setSearchPhone]   = useState("");
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchError, setSearchError]   = useState<string | null>(null);
-
-  // — Área de membros —
-  const [memberPhone, setMemberPhone]   = useState("");
-  const [memberLoading, setMemberLoading] = useState(false);
-  const [memberError, setMemberError]   = useState<string | null>(null);
+  const [phone, setPhone] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     track("obrigado");
-  }, []);
-
-  // Load sticker
-  useEffect(() => {
-    const urlFromSession = (() => { try { return sessionStorage.getItem("figurinha_sticker_url"); } catch { return null; } })();
-    if (urlFromSession) { setStickerUrl(urlFromSession); setStickerLoading(false); return; }
 
     const params = new URLSearchParams(window.location.search);
-
     const foneParam = params.get("fone");
-    if (foneParam && foneParam.length <= 20) {
+    if (foneParam) {
       const digits = foneParam.replace(/\D/g, "").slice(0, 15);
-      fetchWithRetry(`/api/sticker?email=${encodeURIComponent(digits)}`)
-        .then(r => r.json()).then(d => { if (d.url) setStickerUrl(d.url); }).catch(() => {})
-        .finally(() => setStickerLoading(false));
-      return;
+      if (digits.length >= 10) { router.replace(`/membros?fone=${digits}`); return; }
     }
+  }, [router]);
 
-    const emailParam = params.get("email");
-    if (emailParam) {
-      fetchWithRetry(`/api/sticker?email=${encodeURIComponent(emailParam)}`)
-        .then(r => r.json()).then(d => { if (d.url) setStickerUrl(d.url); }).catch(() => {})
-        .finally(() => setStickerLoading(false));
-      return;
-    }
-
-    const id =
-      params.get("src") ||
-      (() => { try { return sessionStorage.getItem("figurinha_sticker_id"); } catch { return null; } })() ||
-      (() => { try { return localStorage.getItem("figurinha_sticker_id"); } catch { return null; } })();
-
-    if (!id) { setStickerLoading(false); return; }
-
-    fetchWithRetry(`/api/sticker?id=${encodeURIComponent(id)}`)
-      .then(r => r.json()).then(d => { if (d.url) setStickerUrl(d.url); }).catch(() => {})
-      .finally(() => setStickerLoading(false));
-  }, []);
-
-  const handleBuscarFigurinha = async () => {
-    const digits = searchPhone.replace(/\D/g, "");
-    if (digits.length < 10) { setSearchError("Ingresá un teléfono válido con código de área."); return; }
-    setSearchLoading(true);
-    setSearchError(null);
-    try {
-      const res = await fetch(`/api/sticker?email=${encodeURIComponent(digits)}`);
-      const data = await res.json();
-      if (data.url) { setStickerUrl(data.url); setSearchError(null); }
-      else setSearchError("Figurita no encontrada. Verificá el número e intentá de nuevo.");
-    } catch {
-      setSearchError("Error al buscar. Intentá de nuevo.");
-    } finally {
-      setSearchLoading(false);
-    }
-  };
-
-  const handleDownload = () => {
-    if (!stickerUrl) return;
-    const a = document.createElement("a");
-    if (stickerUrl.startsWith("data:")) {
-      a.href = stickerUrl;
-      a.download = "mi-figurita-mundial2026.png";
-    } else {
-      a.href = `/api/download?url=${encodeURIComponent(stickerUrl)}&name=mi-figurita-mundial2026`;
-    }
-    a.click();
-  };
-
-  const handleMemberLogin = async () => {
-    const digits = memberPhone.replace(/\D/g, "");
-    if (digits.length < 10) { setMemberError("Ingresá un teléfono válido con código de área."); return; }
-    setMemberLoading(true);
-    setMemberError(null);
+  const handleLogin = async () => {
+    const digits = phone.replace(/\D/g, "");
+    if (digits.length < 10) { setError("Ingresá un número válido con código de área."); return; }
+    setLoading(true); setError(null);
     try {
       const res = await fetch(`/api/membros?fone=${digits}`);
-      if (res.status === 404) { setMemberError("Ninguna compra encontrada para ese número."); return; }
+      if (res.status === 404) { setError("Ninguna compra encontrada para ese número."); return; }
       if (!res.ok) throw new Error();
       router.push(`/membros?fone=${digits}`);
     } catch {
-      setMemberError("Error al verificar. Intentá de nuevo.");
+      setError("Error al verificar. Intentá de nuevo.");
     } finally {
-      setMemberLoading(false);
+      setLoading(false);
     }
   };
 
   return (
     <main style={{
-      minHeight: "100vh",
-      background: "#74ACDF",
+      minHeight: "100vh", background: "#74ACDF",
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       display: "flex", flexDirection: "column", alignItems: "center",
       padding: "36px 16px 56px",
     }}>
 
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 32 }}>
-        <div style={{
-          display: "inline-flex", alignItems: "center", gap: 10,
-          background: "rgba(0,35,149,.12)", borderRadius: 12, padding: "8px 18px", marginBottom: 20,
-        }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(0,35,149,.12)", borderRadius: 12, padding: "8px 18px", marginBottom: 20 }}>
           <span style={{ fontSize: 20 }}>⚽</span>
           <span style={{ color: "#002395", fontWeight: 800, fontSize: 13, letterSpacing: ".1em" }}>FIGURITA COPA 2026</span>
         </div>
-        <h1 style={{
-          color: "#002395", fontSize: "clamp(36px, 8vw, 64px)", fontWeight: 900,
-          margin: "0 0 10px", letterSpacing: ".08em",
-          fontFamily: "var(--font-titulo, 'Arial Black', sans-serif)",
-        }}>
+        <h1 style={{ color: "#002395", fontSize: "clamp(36px, 8vw, 64px)", fontWeight: 900, margin: "0 0 10px", letterSpacing: ".08em", fontFamily: "var(--font-titulo, 'Arial Black', sans-serif)" }}>
           ¡GRACIAS!
         </h1>
         <p style={{ color: "#002395", fontSize: 16, margin: 0, fontWeight: 600 }}>
@@ -281,234 +184,69 @@ export default function Obrigado() {
         </p>
       </div>
 
-      {/* Card Segunda Figurinha */}
-      <div style={{ width: "100%", maxWidth: 520, marginBottom: 20, position: "relative" }}>
-        {/* Glow atrás */}
-        <div className="segunda-glow" />
-        {/* Borda animada */}
-        <div className="segunda-border">
-          <div style={{
-            background: "#fff", borderRadius: 16,
-            padding: "18px 20px",
-            display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16,
-          }}>
-            <div>
-              <p style={{ margin: "0 0 2px", fontSize: 11, fontWeight: 700, color: "#64748b", letterSpacing: ".08em", textTransform: "uppercase" }}>
-                Oferta exclusiva
-              </p>
-              <p style={{ margin: 0, fontSize: 16, fontWeight: 900, color: "#002395", lineHeight: 1.25 }}>
-                Generá tu segunda figurita por solo{" "}
-                <span style={{ color: "#009C3B" }}>$3.500</span>
-              </p>
-            </div>
-            <a
-              href="/?start=1"
-              onClick={() => {
-                try {
-                  const sid = sessionStorage.getItem("_fsid");
-                  if (sid) navigator.sendBeacon("/api/track", new Blob(
-                    [JSON.stringify({ session_id: sid, step: "segunda_obg" })],
-                    { type: "application/json" }
-                  ));
-                  sessionStorage.removeItem("figurinha_sticker_url");
-                  sessionStorage.removeItem("figurinha_sticker_id");
-                } catch { /* ignore */ }
-              }}
-              style={{
-                flexShrink: 0,
-                display: "inline-block",
-                background: "linear-gradient(135deg, #002395, #0040CC)",
-                color: "#74ACDF",
-                borderRadius: 12,
-                padding: "12px 18px",
-                fontSize: 13,
-                fontWeight: 900,
-                textDecoration: "none",
-                letterSpacing: ".04em",
-                whiteSpace: "nowrap",
-                boxShadow: "0 4px 16px rgba(0,35,149,.35)",
-              }}
-            >
-              ¡LA QUIERO! ⚽
-            </a>
-          </div>
-        </div>
-      </div>
-
-      <div style={{ width: "100%", maxWidth: 520, display: "flex", flexDirection: "column", gap: 16 }}>
-
-        {/* ── BLOCO 1: Figurinha + Não recebeu ── */}
-        <div style={{ background: "#fff", borderRadius: 20, overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,.4)" }}>
-
-          {/* Figurinha preview */}
-          {(stickerLoading || stickerUrl) && (
-            <div style={{ background: "#f8fafc", borderBottom: "1px solid #e2e8f0", padding: "24px 28px", display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
-              {stickerLoading ? (
-                <div style={{ width: 120, height: 180, borderRadius: 12, background: "#e2e8f0", animation: "pulse 1.5s ease-in-out infinite" }} />
-              ) : stickerUrl ? (
-                <>
-                  <div style={{ width: 140, borderRadius: 12, overflow: "hidden", boxShadow: "0 8px 32px rgba(0,0,35,.2)", border: "3px solid #002395" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={stickerUrl} alt="Tu figurita" style={{ width: "100%", height: "auto", display: "block" }} />
-                  </div>
-                  <button
-                    onClick={handleDownload}
-                    style={{
-                      background: "#002395", color: "#fff", border: "none", borderRadius: 12,
-                      padding: "13px 28px", fontSize: 14, fontWeight: 800, cursor: "pointer",
-                      letterSpacing: ".06em", textTransform: "uppercase",
-                    }}
-                  >
-                    ⬇ DESCARGAR MI FIGURITA
-                  </button>
-                </>
-              ) : null}
-            </div>
-          )}
-
-          {/* Não recebeu */}
-          <div style={{ padding: "24px 28px" }}>
-            <h2 style={{ fontSize: 17, fontWeight: 800, color: "#002395", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 8 }}>
-              📱 ¿No recibiste la figurita?
-            </h2>
-            <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 14px" }}>
-              {stickerUrl
-                ? "Tu figurita aparece arriba. Usá el botón para descargar."
-                : "Escribí tu número de WhatsApp para encontrarla (SIN +54)."}
-            </p>
-
-            {!stickerUrl && (
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-                <input
-                  type="tel"
-                  inputMode="numeric"
-                  placeholder="Ej: 1123456789"
-                  value={searchPhone}
-                  maxLength={15}
-                  disabled={searchLoading}
-                  aria-label="Número de WhatsApp para buscar figurinha"
-                  onChange={e => setSearchPhone(e.target.value.replace(/\D/g, ""))}
-                  onKeyDown={e => e.key === "Enter" && handleBuscarFigurinha()}
-                  style={{
-                    flex: "1 1 180px", border: "2px solid #e2e8f0", borderRadius: 10,
-                    padding: "11px 14px", fontSize: 14, outline: "none", color: "#0f172a",
-                  }}
-                />
-                <button
-                  onClick={handleBuscarFigurinha}
-                  disabled={searchLoading}
-                  style={{
-                    background: "#002395", color: "#fff", border: "none", borderRadius: 10,
-                    padding: "11px 18px", fontSize: 13, fontWeight: 700, cursor: searchLoading ? "default" : "pointer",
-                    opacity: searchLoading ? 0.7 : 1, whiteSpace: "nowrap",
-                  }}
-                >
-                  {searchLoading ? "..." : "Buscar"}
-                </button>
-              </div>
-            )}
-
-            {searchError && (
-              <p style={{ color: "#dc2626", fontSize: 13, marginTop: 8 }}>{searchError}</p>
-            )}
-          </div>
-        </div>
-
-        {/* ── BLOCO 2: Área de membros ── */}
-        <div style={{
-          background: "#fff",
-          borderRadius: 20, padding: "24px 28px",
-          boxShadow: "0 20px 60px rgba(0,0,0,.15)",
-          border: "2px solid #002395",
-        }}>
-          <h2 style={{ fontSize: 17, fontWeight: 800, color: "#002395", margin: "0 0 6px", display: "flex", alignItems: "center", gap: 8 }}>
-            🏆 ¿Compraste más de 1 producto?
+      <div style={{ width: "100%", maxWidth: 480 }}>
+        <div style={{ background: "#fff", borderRadius: 24, padding: "32px 28px", boxShadow: "0 20px 60px rgba(0,0,0,.25)" }}>
+          <h2 style={{ fontSize: 20, fontWeight: 800, color: "#002395", margin: "0 0 8px", display: "flex", alignItems: "center", gap: 8 }}>
+            📱 Descargá tu figurita con tu número:
           </h2>
-          <p style={{ fontSize: 13, color: "#64748b", margin: "0 0 16px" }}>
-            Ingresá a nuestra área de entregables con tu número para acceder a todos tus productos.
+          <p style={{ fontSize: 14, color: "#64748b", margin: "0 0 20px", fontFamily: "var(--font-papernotes)" }}>
+            Escribí tu WhatsApp (sin +54) para acceder a tu figurita y todos tus productos.
           </p>
 
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-            <input
-              type="tel"
-              inputMode="numeric"
-              placeholder="Ej: 1123456789"
-              value={memberPhone}
-              maxLength={15}
-              disabled={memberLoading}
-              aria-label="Número de WhatsApp para acessar área de membros"
-              onChange={e => setMemberPhone(e.target.value.replace(/\D/g, ""))}
-              onKeyDown={e => e.key === "Enter" && handleMemberLogin()}
-              style={{
-                flex: "1 1 180px", border: "2px solid #e2e8f0", borderRadius: 10,
-                padding: "11px 14px", fontSize: 14, outline: "none", color: "#0f172a",
-              }}
-            />
-            <button
-              onClick={handleMemberLogin}
-              disabled={memberLoading}
-              style={{
-                background: "#74ACDF", color: "#002395", border: "none", borderRadius: 10,
-                padding: "11px 18px", fontSize: 13, fontWeight: 800, cursor: memberLoading ? "default" : "pointer",
-                opacity: memberLoading ? 0.7 : 1, whiteSpace: "nowrap",
-              }}
-            >
-              {memberLoading ? "..." : "INGRESAR →"}
-            </button>
-          </div>
+          <input
+            type="tel"
+            inputMode="numeric"
+            placeholder="Ej: 1123456789"
+            value={phone}
+            maxLength={15}
+            disabled={loading}
+            autoFocus
+            onChange={e => { setPhone(e.target.value.replace(/\D/g, "")); setError(null); }}
+            onKeyDown={e => e.key === "Enter" && !loading && handleLogin()}
+            style={{
+              width: "100%", boxSizing: "border-box",
+              border: `2px solid ${error ? "#ef4444" : "#002395"}`,
+              borderRadius: 14, padding: "16px 18px",
+              fontSize: 18, outline: "none", color: "#0f172a",
+              fontWeight: 600, letterSpacing: ".04em",
+              marginBottom: 12, textAlign: "center",
+            }}
+          />
 
-          {memberError && (
-            <p style={{ color: "#dc2626", fontSize: 13, marginTop: 8 }}>{memberError}</p>
-          )}
+          {error && <p style={{ color: "#dc2626", fontSize: 13, margin: "0 0 10px", fontWeight: 600 }}>{error}</p>}
+
+          <button
+            onClick={handleLogin}
+            disabled={loading}
+            style={{
+              width: "100%", padding: "18px", border: "none", borderRadius: 14,
+              cursor: loading ? "default" : "pointer",
+              background: "linear-gradient(135deg,#002395,#0040CC)", color: "#fff",
+              fontSize: 17, fontWeight: 800, letterSpacing: ".1em",
+              fontFamily: "var(--font-titulo)", opacity: loading ? 0.7 : 1,
+              boxShadow: "0 6px 24px rgba(0,35,149,.4)",
+            }}
+          >
+            {loading ? "VERIFICANDO..." : "ACCEDER A MI FIGURITA →"}
+          </button>
         </div>
 
+        <a
+          href="/"
+          onClick={() => { try { localStorage.removeItem("figurinha_sticker_id"); sessionStorage.removeItem("figurinha_sticker_url"); sessionStorage.removeItem("figurinha_sticker_id"); } catch {/**/ } }}
+          style={{ display: "block", textAlign: "center", color: "rgba(0,35,149,.45)", fontSize: 13, textDecoration: "underline", padding: "16px 8px" }}
+        >
+          Crear nueva figurita
+        </a>
       </div>
 
       <FaqBubble />
 
       <style>{`
-        @keyframes pulse {
-          0%, 100% { opacity: 1; }
-          50% { opacity: .5; }
-        }
-        @keyframes fadeInLabel {
-          from { opacity: 0; transform: translateX(8px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes slideUp {
-          from { opacity: 0; transform: translateY(12px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .faq-bubble-btn { width: 46px; height: 46px; }
-        @media (min-width: 641px) { .faq-bubble-btn { width: 92px; height: 92px; } }
-
-        @keyframes borderSpin {
-          0%   { background-position: 0% 50%; }
-          50%  { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes glowPulse {
-          0%, 100% { opacity: .55; transform: scale(1); }
-          50%       { opacity: .85; transform: scale(1.04); }
-        }
-        .segunda-border {
-          padding: 3px;
-          border-radius: 18px;
-          background: linear-gradient(270deg, #002395, #009C3B, #FFDF00, #EF4444, #002395);
-          background-size: 300% 300%;
-          animation: borderSpin 4s ease infinite;
-        }
-        .segunda-glow {
-          position: absolute;
-          inset: -6px;
-          border-radius: 24px;
-          background: linear-gradient(270deg, #002395, #009C3B, #FFDF00, #EF4444);
-          background-size: 300% 300%;
-          animation: borderSpin 4s ease infinite, glowPulse 3s ease-in-out infinite;
-          filter: blur(14px);
-          z-index: 0;
-        }
-        .segunda-border { position: relative; z-index: 1; }
+        @keyframes fadeInLabel { from{opacity:0;transform:translateX(8px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes slideUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+        .faq-bubble-btn { width:46px; height:46px }
+        @media(min-width:641px){.faq-bubble-btn{width:92px;height:92px}}
       `}</style>
     </main>
   );

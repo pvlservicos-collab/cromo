@@ -3,21 +3,21 @@
 import { useState, useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
+import { track } from "@/lib/track";
 
 interface Pedido {
   id: number;
   nome: string | null;
-  clube: string | null;
   sticker_url: string;
   preview_url: string | null;
   pdf_url: string | null;
-  status: string;
   created_at: string;
 }
 
 interface PedidoItem {
   item_type: string;
   offer_name: string | null;
+  offer_hash: string | null;
   product_name: string | null;
   price: number;
   status: string;
@@ -36,11 +36,10 @@ interface CatalogProduct {
   id: string;
   name: string;
   desc: React.ReactNode;
-  section: "main" | "sorteio";
   renderImage: (bought: boolean) => React.ReactNode;
   acquireUrl?: string;
   downloadLabel?: string;
-  infoMode?: boolean;           // always visible, no lock/buy
+  infoMode?: boolean;
   checkBought?: (d: MemberData) => boolean;
   getDownloadUrl?: (d: MemberData) => string | null;
   boughtExtra?: React.ReactNode;
@@ -64,61 +63,29 @@ function ProductImg({ src, alt, bought }: { src: string; alt: string; bought: bo
 
 const CATALOG: CatalogProduct[] = [
   {
-    id: "rifa-sorte",
-    section: "main",
-    name: "Rifa da Sorte",
-    desc: (<>Ingresso para a Copa — Sorteo el 11/06/2026<br /><span style={{ color: "#059669", fontWeight: 700 }}>Você já está participando! ✅</span></>),
-    infoMode: true,
-    renderImage: (bought) => <ProductImg src="/sorteio.webp" alt="Rifa da Sorte" bought={bought} />,
-    getDownloadUrl: () => null,
-    boughtExtra: (
-      <div style={{ border: "1.5px solid #e2e8f0", borderRadius: 8, padding: "10px 12px", marginTop: 4 }}>
-        <p style={{ margin: "0 0 8px", fontSize: 10, fontWeight: 800, color: "#002395" }}>Resultado do ingresso:</p>
-        <div style={{ minHeight: 40, borderRadius: 6, background: "#f8fafc" }} />
-      </div>
-    ),
-  },
-  {
     id: "pacote-pdf",
-    section: "main",
-    name: "Pacotinho Copa 2026",
-    desc: "Deixe a experiência mais imersiva com o PDF dos pacotinhos oficiais",
+    name: "Paquetito Copa 2026",
+    desc: "Hacé la experiencia más inmersiva con el PDF de los paquetitos oficiales",
     renderImage: (bought) => <ProductImg src="/embalagensfigurinhas.webp" alt="Kit Embalagem Copa 2026" bought={bought} />,
     acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HQ",
-    downloadLabel: "Baixar PDF",
+    downloadLabel: "Descargar PDF",
     checkBought: (d) =>
       d.items.some(i =>
         i.offer_name?.toLowerCase().includes("pacote") ||
         i.product_name?.toLowerCase().includes("pacote") ||
         i.offer_name?.toLowerCase().includes("pacotinho") ||
         i.product_name?.toLowerCase().includes("pacotinho") ||
+        i.offer_name?.toLowerCase().includes("paquetito") ||
+        i.product_name?.toLowerCase().includes("paquetito") ||
         i.offer_name?.toLowerCase().includes("kit") ||
         i.product_name?.toLowerCase().includes("kit")
       ),
-    getDownloadUrl: () => "/figurinhacompleta-3linhas.pdf",
-  },
-  {
-    id: "neymar",
-    section: "main",
-    name: "Figurinha Messi",
-    desc: "Camisa da seleção — pacote em PDF para impressão",
-    renderImage: (bought) => <ProductImg src="/figurinhamessi.webp" alt="Figurinha Messi" bought={bought} />,
-    acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HT",
-    checkBought: (d) =>
-      d.items.some(i =>
-        i.offer_name?.toLowerCase().includes("neymar") ||
-        i.product_name?.toLowerCase().includes("neymar") ||
-        i.offer_name?.toLowerCase().includes("camisa") ||
-        i.product_name?.toLowerCase().includes("camisa")
-      ),
-    getDownloadUrl: () => null,
-    renderCard: (data, width) => <NeymarCard data={data} width={width} />,
+    getDownloadUrl: () => "/embalagemfigurinha.pdf",
   },
   {
     id: "poster-a2",
-    section: "main",
     name: "Poster A4",
-    desc: "Baixe o PDF para imprimir e postar em sua casa",
+    desc: "Descargá el PDF para imprimir y decorar tu casa",
     renderImage: (bought) => <ProductImg src="/poster.webp" alt="Poster A4 PDF" bought={bought} />,
     acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HR",
     checkBought: (d) =>
@@ -132,55 +99,24 @@ const CATALOG: CatalogProduct[] = [
     renderCard: (data, width) => <PosterA4Card data={data} width={width} />,
   },
   {
-    id: "3x",
-    section: "sorteio",
-    name: "Pacote 3×",
-    desc: "Figurinha em grade 3×3 para impressão — 9 unidades por folha",
-    renderImage: (bought) => <ProductImg src="/3x.webp" alt="Pacote 3x" bought={bought} />,
-    acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HP",
-    boughtMessage: "Você já aumentou suas chances",
+    id: "messi",
+    name: "Figurita Messi",
+    desc: "Camiseta de la selección — paquete en PDF para impresión",
+    renderImage: (bought) => <ProductImg src="/figurinhamessi.webp" alt="Figurita Messi" bought={bought} />,
+    acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HT",
     checkBought: (d) =>
       d.items.some(i =>
-        i.offer_name?.toLowerCase().includes("3x") ||
-        i.product_name?.toLowerCase().includes("3x") ||
-        i.offer_name?.toLowerCase().includes("3 x") ||
-        i.product_name?.toLowerCase().includes("3 x")
+        i.offer_name?.toLowerCase().includes("messi") ||
+        i.product_name?.toLowerCase().includes("messi") ||
+        i.offer_name?.toLowerCase().includes("neymar") ||
+        i.product_name?.toLowerCase().includes("neymar") ||
+        i.offer_name?.toLowerCase().includes("camisa") ||
+        i.product_name?.toLowerCase().includes("camisa")
       ),
     getDownloadUrl: () => null,
-  },
-  {
-    id: "10x",
-    section: "sorteio",
-    name: "Pacote 10×",
-    desc: "10 folhas com sua figurinha — máximo para presentear",
-    renderImage: (bought) => <ProductImg src="/10x.webp" alt="Pacote 10x" bought={bought} />,
-    acquireUrl: "https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HS",
-    boughtMessage: "Você já aumentou suas chances",
-    checkBought: (d) =>
-      d.items.some(i =>
-        i.offer_name?.toLowerCase().includes("10x") ||
-        i.product_name?.toLowerCase().includes("10x") ||
-        i.offer_name?.toLowerCase().includes("10 x") ||
-        i.product_name?.toLowerCase().includes("10 x")
-      ),
-    getDownloadUrl: () => null,
+    renderCard: (data, width) => <MessiCard data={data} width={width} />,
   },
 ];
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function formatPhone(input: string): string {
-  let digits = input.replace(/\D/g, "");
-  if (digits.startsWith("0055")) digits = digits.slice(4);
-  else if (digits.startsWith("55") && digits.length > 11) digits = digits.slice(2);
-  digits = digits.slice(0, 11);
-  const n = digits.length;
-  if (n === 0) return "";
-  if (n <= 2) return `(${digits}`;
-  if (n <= 6) return `(${digits.slice(0, 2)}) ${digits.slice(2)}`;
-  if (n <= 10) return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-  return `(${digits.slice(0, 2)}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
-}
 
 // ─── Card components ──────────────────────────────────────────────────────────
 
@@ -197,7 +133,7 @@ function StickerCard({ pedido }: { pedido: Pedido }) {
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={pedido.preview_url || pedido.sticker_url}
-          alt={pedido.nome || "figurinha"}
+          alt={pedido.nome || "figurita"}
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
         />
         <div style={{
@@ -206,26 +142,20 @@ function StickerCard({ pedido }: { pedido: Pedido }) {
         }} />
         <div style={{ position: "absolute", bottom: 12, left: 12, right: 12 }}>
           <p style={{ color: "#fff", fontSize: 13, fontWeight: 800, margin: 0, textShadow: "0 1px 4px rgba(0,0,0,.5)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-            {pedido.nome || "Figurinha"}
+            {pedido.nome || "Figurita"}
           </p>
-          <p style={{ color: "rgba(255,255,255,.75)", fontSize: 11, margin: "2px 0 0" }}>{pedido.clube || "Copa 2026"}</p>
-        </div>
-        <div style={{
-          position: "absolute", top: 10, right: 10,
-          background: "#002395", borderRadius: 8, padding: "3px 8px",
-        }}>
-          <span style={{ color: "#FFDF00", fontSize: 9, fontWeight: 800, letterSpacing: ".04em", textTransform: "uppercase" }}>{pedido.status}</span>
+          <p style={{ color: "rgba(255,255,255,.75)", fontSize: 11, margin: "2px 0 0" }}>Copa 2026</p>
         </div>
       </div>
       <div style={{ padding: "14px 14px 14px" }}>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           <a
-            href={`/api/download?url=${encodeURIComponent(pedido.sticker_url)}&name=figurinha-${(pedido.nome || "copa").toLowerCase().replace(/\s+/g, "-")}`}
+            href={`/api/download?url=${encodeURIComponent(pedido.sticker_url)}&name=figurita-${(pedido.nome || "copa").toLowerCase().replace(/\s+/g, "-")}`}
             style={{ display: "block", textAlign: "center", background: "#002395", color: "#fff", borderRadius: 10, padding: "10px 8px", fontSize: 12, fontWeight: 700, textDecoration: "none", letterSpacing: ".03em" }}
-          >⬇ Baixar PNG</a>
+          >⬇ Descargar PNG</a>
           {pedido.pdf_url && (
             <a
-              href={`/api/download?url=${encodeURIComponent(pedido.pdf_url)}&name=figurinha-pdf-${(pedido.nome || "copa").toLowerCase().replace(/\s+/g, "-")}`}
+              href={`/api/download?url=${encodeURIComponent(pedido.pdf_url)}&name=figurita-pdf-${(pedido.nome || "copa").toLowerCase().replace(/\s+/g, "-")}`}
               style={{ display: "block", textAlign: "center", background: "#f8fafc", color: "#334155", borderRadius: 10, padding: "10px 8px", fontSize: 12, fontWeight: 700, textDecoration: "none", border: "1px solid #e2e8f0" }}
             >📄 PDF</a>
           )}
@@ -244,14 +174,11 @@ function CatalogCard({ product, data, width = 240 }: { product: CatalogProduct; 
     <div style={{
       flexShrink: 0, width, scrollSnapAlign: "start",
       borderRadius: 20, overflow: "hidden",
-      boxShadow: bought || infoMode
-        ? "0 8px 32px rgba(0,0,0,.13)"
-        : "0 4px 16px rgba(0,0,0,.09)",
+      boxShadow: bought || infoMode ? "0 8px 32px rgba(0,0,0,.13)" : "0 4px 16px rgba(0,0,0,.09)",
       background: "#fff",
       border: bought && !infoMode ? "2px solid #002395" : "2px solid transparent",
       transition: "box-shadow .2s",
     }}>
-      {/* Square image */}
       <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", overflow: "hidden" }}>
         {product.renderImage(bought)}
         {!bought && !infoMode && (
@@ -261,25 +188,18 @@ function CatalogCard({ product, data, width = 240 }: { product: CatalogProduct; 
             backdropFilter: "grayscale(1)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <div style={{
-              background: "rgba(255,255,255,.15)", borderRadius: "50%",
-              width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
+            <div style={{ background: "rgba(255,255,255,.15)", borderRadius: "50%", width: 52, height: 52, display: "flex", alignItems: "center", justifyContent: "center" }}>
               <span style={{ fontSize: 26 }}>🔒</span>
             </div>
           </div>
         )}
         {bought && !infoMode && (
-          <div style={{
-            position: "absolute", top: 10, right: 10,
-            background: "#002395", borderRadius: 8, padding: "4px 9px",
-          }}>
-            <span style={{ color: "#FFDF00", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ SEU</span>
+          <div style={{ position: "absolute", top: 10, right: 10, background: "#002395", borderRadius: 8, padding: "4px 9px" }}>
+            <span style={{ color: "#74ACDF", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ TUYO</span>
           </div>
         )}
       </div>
 
-      {/* Body */}
       <div style={{ padding: "16px 18px 18px" }}>
         <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.25 }}>
           {product.name}
@@ -295,7 +215,6 @@ function CatalogCard({ product, data, width = 240 }: { product: CatalogProduct; 
             {bought && product.boughtExtra && (
               <div style={{ marginBottom: 12 }}>{product.boughtExtra}</div>
             )}
-
             {bought && downloadUrl ? (
               <a
                 href={downloadUrl}
@@ -305,24 +224,24 @@ function CatalogCard({ product, data, width = 240 }: { product: CatalogProduct; 
                   borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 700,
                   textDecoration: "none", letterSpacing: ".03em",
                 }}
-              >⬇ {product.downloadLabel || "Download"}</a>
+              >⬇ {product.downloadLabel || "Descargar"}</a>
             ) : bought && !downloadUrl ? (
               <div style={{
                 textAlign: "center", background: "#f0fdf4",
                 color: "#166534", borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 700,
                 border: "1px solid #bbf7d0",
-              }}>{product.boughtMessage || "✓ Disponível"}</div>
+              }}>{product.boughtMessage || "✓ Disponible"}</div>
             ) : product.acquireUrl ? (
               <a
                 href={product.acquireUrl}
                 style={{
                   display: "block", textAlign: "center",
-                  background: "#FFDF00", color: "#002395",
+                  background: "#74ACDF", color: "#002395",
                   borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 900,
                   textDecoration: "none", letterSpacing: ".03em",
-                  boxShadow: "0 4px 12px rgba(255,223,0,.4)",
+                  boxShadow: "0 4px 12px rgba(116,172,223,.5)",
                 }}
-              >Adquira agora</a>
+              >Adquirí ahora</a>
             ) : null}
           </>
         )}
@@ -378,13 +297,13 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
       const url = URL.createObjectURL(pdfBlob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = layout === "a4" ? "poster-completo-a4.pdf" : "poster-figurinha-4x4.pdf";
+      a.download = layout === "a4" ? "poster-completo-a4.pdf" : "poster-figurita-4x4.pdf";
       a.click();
       URL.revokeObjectURL(url);
     } catch {
-      if (isUpload && isB) setUploadErrorB("Falha ao gerar. Tente novamente.");
-      else if (isUpload) setUploadError("Falha ao gerar. Tente novamente.");
-      else setGenError("Falha ao gerar. Tente novamente.");
+      if (isUpload && isB) setUploadErrorB("Error al generar. Intentá de nuevo.");
+      else if (isUpload) setUploadError("Error al generar. Intentá de nuevo.");
+      else setGenError("Error al generar. Intentá de nuevo.");
     } finally {
       if (isUpload && isB) setUploadLoadingB(false);
       else if (isUpload) setUploadLoading(false);
@@ -399,7 +318,7 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
   }) => (
     <div>
       <p style={{ margin: "0 0 6px", fontSize: 11, fontWeight: 700, color: "#002395" }}>
-        {layout === "a4" ? "📄 Poster Completo (A4)" : "🖼 Grade 4×4"}
+        {layout === "a4" ? "📄 Poster Completo (A4)" : "🖼 Grilla 4×4"}
       </p>
       <input ref={inputR} type="file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }}
         onChange={e => setFile(e.target.files?.[0] ?? null)} />
@@ -409,7 +328,7 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
           textAlign: "center", cursor: "pointer", background: "#f8fafc", minWidth: 0,
         }}>
           <p style={{ margin: 0, fontSize: 9, color: file ? "#334155" : "#94a3b8", fontWeight: file ? 600 : 400, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {file ? file.name : "Selecionar imagem"}
+            {file ? file.name : "Seleccionar imagen"}
           </p>
         </div>
         <button onClick={() => file && runGenerate(file, layout)} disabled={loading || !file} style={{
@@ -434,7 +353,6 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
       border: bought ? "2px solid #002395" : "2px solid transparent",
     }}>
       <div className="poster-card-inner">
-        {/* Image */}
         <div className="poster-card-image" style={{ position: "relative", overflow: "hidden", flexShrink: 0 }}>
           <ProductImg src="/poster.webp" alt="Poster A4" bought={bought} />
           {!bought && (
@@ -449,15 +367,14 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
           )}
           {bought && (
             <div style={{ position: "absolute", top: 10, right: 10, background: "#002395", borderRadius: 8, padding: "4px 9px" }}>
-              <span style={{ color: "#FFDF00", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ SEU</span>
+              <span style={{ color: "#74ACDF", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ TUYO</span>
             </div>
           )}
         </div>
 
-        {/* Body */}
         <div style={{ padding: "14px 16px 16px" }}>
           <p style={{ margin: "0 0 2px", fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.25 }}>Poster A4</p>
-          <p style={{ margin: "0 0 12px", fontSize: 11, color: "#64748b", lineHeight: 1.4 }}>PDF para imprimir e decorar em casa</p>
+          <p style={{ margin: "0 0 12px", fontSize: 11, color: "#64748b", lineHeight: 1.4 }}>PDF para imprimir y decorar tu casa</p>
 
           {bought ? (
             <>
@@ -467,12 +384,12 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
                 cursor: genLoading || !stickerUrl ? "default" : "pointer",
                 opacity: genLoading || !stickerUrl ? 0.7 : 1, letterSpacing: ".03em",
               }}>
-                {genLoading ? "Gerando PDF..." : "⬇ Baixar PDF 4×4"}
+                {genLoading ? "Generando PDF..." : "⬇ Descargar PDF 4×4"}
               </button>
               {genError && <p style={{ color: "#dc2626", fontSize: 11, margin: "4px 0 0", textAlign: "center" }}>{genError}</p>}
 
               <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1.5px solid #f1f5f9", display: "flex", flexDirection: "column", gap: 10 }}>
-                <p style={{ margin: "0 0 6px", fontSize: 11, color: "#64748b" }}>Gerar com outra foto:</p>
+                <p style={{ margin: "0 0 6px", fontSize: 11, color: "#64748b" }}>Generar con otra foto:</p>
                 <UploadSection file={uploadFile} setFile={setUploadFile} loading={uploadLoading} error={uploadError} layout="grid" inputR={inputRef} />
                 <UploadSection file={uploadFileB} setFile={setUploadFileB} loading={uploadLoadingB} error={uploadErrorB} layout="a4" inputR={inputRefB} />
               </div>
@@ -480,11 +397,11 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
           ) : (
             <a href="https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HR" style={{
               display: "block", textAlign: "center",
-              background: "#FFDF00", color: "#002395",
+              background: "#74ACDF", color: "#002395",
               borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 900,
               textDecoration: "none", letterSpacing: ".03em",
-              boxShadow: "0 4px 12px rgba(255,223,0,.4)",
-            }}>Adquira agora</a>
+              boxShadow: "0 4px 12px rgba(116,172,223,.5)",
+            }}>Adquirí ahora</a>
           )}
         </div>
       </div>
@@ -492,8 +409,10 @@ function PosterA4Card({ data, width = 250 }: { data: MemberData; width?: number 
   );
 }
 
-function NeymarCard({ data, width = 250 }: { data: MemberData; width?: number }) {
+function MessiCard({ data, width = 250 }: { data: MemberData; width?: number }) {
   const bought = data.items.some(i =>
+    i.offer_name?.toLowerCase().includes("messi") ||
+    i.product_name?.toLowerCase().includes("messi") ||
     i.offer_name?.toLowerCase().includes("neymar") ||
     i.product_name?.toLowerCase().includes("neymar") ||
     i.offer_name?.toLowerCase().includes("camisa") ||
@@ -509,7 +428,7 @@ function NeymarCard({ data, width = 250 }: { data: MemberData; width?: number })
       border: bought ? "2px solid #002395" : "2px solid transparent",
     }}>
       <div style={{ position: "relative", width: "100%", aspectRatio: "1/1", overflow: "hidden" }}>
-        <ProductImg src="/figurinhamessi.webp" alt="Figurinha Messi" bought={bought} />
+        <ProductImg src="/figurinhamessi.webp" alt="Figurita Messi" bought={bought} />
         {!bought && (
           <div style={{
             position: "absolute", inset: 0, background: "rgba(15,15,15,.5)",
@@ -522,75 +441,59 @@ function NeymarCard({ data, width = 250 }: { data: MemberData; width?: number })
         )}
         {bought && (
           <div style={{ position: "absolute", top: 10, right: 10, background: "#002395", borderRadius: 8, padding: "4px 9px" }}>
-            <span style={{ color: "#FFDF00", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ SEU</span>
+            <span style={{ color: "#74ACDF", fontSize: 10, fontWeight: 800, letterSpacing: ".04em" }}>✓ TUYO</span>
           </div>
         )}
       </div>
       <div style={{ padding: "16px 18px 18px" }}>
-        <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.25 }}>Figurinha Messi</p>
-        <p style={{ margin: "0 0 14px", fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Figurinha exclusiva do Messi para download ou em PDF para impressão</p>
+        <p style={{ margin: "0 0 4px", fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.25 }}>Figurita Messi</p>
+        <p style={{ margin: "0 0 14px", fontSize: 12, color: "#64748b", lineHeight: 1.5 }}>Figurita exclusiva de Messi para descargar en PNG o en PDF para impresión</p>
         {bought ? (
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             <a
-              href="/figurinhamessi.webp"
-              download="figurinha-messi.webp"
+              href="/Fig Messi total.png"
+              download="figurita-messi.png"
               style={{
                 display: "block", textAlign: "center",
                 background: "#002395", color: "#fff",
                 borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 700,
                 textDecoration: "none", letterSpacing: ".03em",
               }}
-            >⬇ Baixar PNG</a>
+            >⬇ Descargar PNG</a>
             <a
               href="/Fig messi imprimir.pdf"
-              download="figurinha-messi-imprimir.pdf"
+              download="figurita-messi-imprimir.pdf"
               style={{
                 display: "block", textAlign: "center",
                 background: "#f8fafc", color: "#334155",
                 borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 700,
                 textDecoration: "none", border: "1px solid #e2e8f0",
               }}
-            >📄 Baixar PDF</a>
+            >📄 Descargar PDF</a>
           </div>
         ) : (
           <a
             href="https://checkout.figurinhadacopadomundo.com/VCCL1O8SD2HT"
             style={{
               display: "block", textAlign: "center",
-              background: "#FFDF00", color: "#002395",
+              background: "#74ACDF", color: "#002395",
               borderRadius: 12, padding: "11px 8px", fontSize: 13, fontWeight: 900,
               textDecoration: "none", letterSpacing: ".03em",
-              boxShadow: "0 4px 12px rgba(255,223,0,.4)",
+              boxShadow: "0 4px 12px rgba(116,172,223,.5)",
             }}
-          >Adquira agora</a>
+          >Adquirí ahora</a>
         )}
       </div>
     </div>
   );
 }
 
-function ProductRow({ title, accent, children }: { title: string; accent?: boolean; children: React.ReactNode }) {
+function ProductRow({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom: 40 }}>
-      {accent ? (
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-          <div style={{ flex: 1, height: 2, background: "#0f172a", borderRadius: 2 }} />
-          <h3 style={{
-            color: "#fff", background: "#0f172a",
-            fontWeight: 900, fontSize: 13,
-            margin: 0, letterSpacing: ".12em",
-            borderRadius: 99, padding: "8px 20px",
-            textTransform: "uppercase" as const, whiteSpace: "nowrap",
-          }}>
-            {title}
-          </h3>
-          <div style={{ flex: 1, height: 2, background: "#0f172a", borderRadius: 2 }} />
-        </div>
-      ) : (
-        <h3 style={{ color: "#0f172a", fontWeight: 900, fontSize: 22, margin: "0 0 18px", letterSpacing: "-.01em" }}>
-          {title}
-        </h3>
-      )}
+      <h3 style={{ color: "#0f172a", fontWeight: 900, fontSize: 22, margin: "0 0 18px", letterSpacing: "-.01em" }}>
+        {title}
+      </h3>
       <div className="product-row-scroll">
         {children}
       </div>
@@ -611,16 +514,16 @@ function MembrosContent() {
 
   const fetchMember = async (fone: string) => {
     const digits = fone.replace(/\D/g, "");
-    if (digits.length < 10) { setError("Digite um número de WhatsApp válido com DDD."); return; }
+    if (digits.length < 10) { setError("Ingresá un número de WhatsApp válido con código de área."); return; }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch(`/api/membros?fone=${digits}`);
-      if (res.status === 404) { setError("Nenhuma compra encontrada para esse número. Verifique se digitou corretamente."); setData(null); return; }
+      if (res.status === 404) { setError("Ninguna compra encontrada para ese número. Verificá si lo escribiste correctamente."); setData(null); return; }
       if (!res.ok) throw new Error();
       setData(await res.json());
     } catch {
-      setError("Erro ao buscar. Tente novamente.");
+      setError("Error al buscar. Intentá de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -631,16 +534,23 @@ function MembrosContent() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [foneParam]);
 
+  useEffect(() => {
+    if (!data || !data.pedidos?.length) return;
+    const digits = phone.replace(/\D/g, "");
+    track("recebeu_figurinha", { email: digits || undefined, nome: data.nome || undefined });
+    const temBumpPago = data.items?.some(i => i.item_type === "order_bump" && i.status === "pago");
+    if (temBumpPago) track("recebeu_figurinha_plus", { email: digits || undefined, nome: data.nome || undefined });
+  }, [data, phone]);
+
   return (
     <main style={{
       minHeight: "100vh",
-      background: "#FFDF00",
+      background: "#74ACDF",
       fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       padding: "40px 32px 64px",
       display: "flex", flexDirection: "column", alignItems: "center",
     }}>
 
-      {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 32 }}>
         <div style={{
           display: "inline-flex", alignItems: "center", gap: 10,
@@ -648,14 +558,14 @@ function MembrosContent() {
         }}>
           <span style={{ fontSize: 18 }}>⚽</span>
           <span className="membros-badge" style={{ color: "#002395", fontWeight: 800, fontSize: 13, letterSpacing: ".12em", textTransform: "uppercase" }}>
-            Figurinha Copa 2026
+            Figurita Copa 2026
           </span>
         </div>
         <h1 className="membros-h1" style={{ color: "#002395", fontSize: 28, fontWeight: 900, margin: "0 0 8px", letterSpacing: ".06em", whiteSpace: "nowrap" }}>
-          ÁREA DE ENTREGÁVEIS
+          ÁREA DE ENTREGABLES
         </h1>
         <p style={{ color: "rgba(0,35,149,.6)", fontSize: 14, margin: 0, fontWeight: 500 }}>
-          Acesse todos os seus produtos comprados
+          Accedé a todos tus productos comprados
         </p>
       </div>
 
@@ -665,23 +575,23 @@ function MembrosContent() {
         {!data && (
           <div style={{
             background: "#fff", borderRadius: 20, padding: "32px 28px",
-            boxShadow: "0 20px 60px rgba(0,0,0,.15)", marginBottom: 16, maxWidth: 460, margin: "0 auto 16px",
+            boxShadow: "0 20px 60px rgba(0,0,0,.15)", maxWidth: 460, margin: "0 auto 16px",
           }}>
             <div style={{ textAlign: "center", marginBottom: 24 }}>
               <div style={{ fontSize: 40, marginBottom: 10 }}>🏆</div>
               <h2 style={{ fontSize: 20, fontWeight: 800, color: "#002395", margin: "0 0 6px" }}>
-                Entrar com seu WhatsApp
+                Ingresar con tu WhatsApp
               </h2>
               <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>
-                Use o mesmo número cadastrado na compra
+                Usá el mismo número que usaste en la compra
               </p>
             </div>
             <input
               type="tel"
               inputMode="numeric"
-              placeholder="(11) 9 8765-4321"
+              placeholder="Ej: 1123456789"
               value={phone}
-              onChange={e => setPhone(formatPhone(e.target.value))}
+              onChange={e => setPhone(e.target.value.replace(/\D/g, ""))}
               onKeyDown={e => e.key === "Enter" && fetchMember(phone)}
               style={{
                 width: "100%", boxSizing: "border-box",
@@ -700,7 +610,7 @@ function MembrosContent() {
                 letterSpacing: ".06em", textTransform: "uppercase",
               }}
             >
-              {loading ? "Buscando..." : "ACESSAR MEUS PRODUTOS →"}
+              {loading ? "Buscando..." : "ACCEDER A MIS PRODUCTOS →"}
             </button>
           </div>
         )}
@@ -719,13 +629,13 @@ function MembrosContent() {
               <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
                 <div style={{
                   width: 44, height: 44, borderRadius: 12,
-                  background: "#FFDF00",
+                  background: "#74ACDF",
                   display: "flex", alignItems: "center", justifyContent: "center",
                   fontSize: 22, flexShrink: 0,
                 }}>⚽</div>
                 <div>
                   <p style={{ color: "rgba(255,255,255,.5)", fontSize: 11, margin: "0 0 2px", textTransform: "uppercase", letterSpacing: ".08em", fontWeight: 700 }}>
-                    Área de membros
+                    Área de miembros
                   </p>
                   <p style={{ color: "#fff", fontSize: 20, fontWeight: 900, margin: 0, letterSpacing: "-.01em" }}>
                     {data.nome || "Cliente"}
@@ -740,44 +650,94 @@ function MembrosContent() {
                   borderRadius: 10, padding: "8px 16px", fontSize: 12, cursor: "pointer", fontWeight: 600,
                 }}
               >
-                Trocar número
+                Cambiar número
               </button>
             </div>
 
-            {/* Row 1 — Figurinhas personalizadas */}
+            {/* Row 1 — Figuritas */}
             {data.pedidos.length > 0 && (
-              <ProductRow title={`Suas Figurinhas (${data.pedidos.length})`}>
+              <ProductRow title={`Tus Figuritas (${data.pedidos.length})`}>
                 {data.pedidos.map(p => <StickerCard key={p.id} pedido={p} />)}
               </ProductRow>
             )}
 
-            {/* Row 2 — Produtos principais */}
-            <ProductRow title="Produtos Copa 2026">
-              {CATALOG.filter(p => p.section === "main").map(product =>
+            {/* Upsell: generar otra figurita */}
+            <div style={{ position: "relative", marginBottom: 28 }}>
+              <div style={{
+                position: "absolute", inset: -6, borderRadius: 24,
+                background: "linear-gradient(270deg,#002395,#009C3B,#74ACDF,#FFFFFF)",
+                backgroundSize: "300% 300%", animation: "borderSpin 4s ease infinite",
+                filter: "blur(14px)", opacity: .6, zIndex: 0,
+              }} />
+              <div style={{
+                position: "relative", zIndex: 1,
+                padding: 3, borderRadius: 18,
+                background: "linear-gradient(270deg,#002395,#009C3B,#74ACDF,#FFFFFF)",
+                backgroundSize: "300% 300%", animation: "borderSpin 4s ease infinite",
+              }}>
+                <div style={{
+                  background: "#fff", borderRadius: 16, padding: "18px 20px",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 12, textAlign: "center",
+                }}>
+                  <div>
+                    <p style={{ margin: "0 0 4px", fontSize: 11, fontWeight: 700, color: "#64748b", letterSpacing: ".08em", textTransform: "uppercase" }}>
+                      Oferta exclusiva
+                    </p>
+                    <p style={{ margin: 0, fontSize: 17, fontWeight: 900, color: "#002395", lineHeight: 1.3 }}>
+                      Generá otra figurita por solo <span style={{ color: "#009C3B" }}>$3.500</span>
+                    </p>
+                  </div>
+                  <a href="/?start=1"
+                    onClick={() => { try { sessionStorage.removeItem("figurinha_sticker_url"); sessionStorage.removeItem("figurinha_sticker_id"); } catch {/**/} }}
+                    style={{
+                      display: "block", width: "100%", boxSizing: "border-box",
+                      background: "linear-gradient(135deg,#002395,#0040CC)",
+                      color: "#74ACDF", borderRadius: 12, padding: "14px 18px",
+                      fontSize: 15, fontWeight: 900, textDecoration: "none",
+                      letterSpacing: ".06em", textAlign: "center",
+                      boxShadow: "0 4px 16px rgba(0,35,149,.35)",
+                    }}>
+                    ¡APROVECHAR! ⚽
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            {/* Row 2 — Productos */}
+            <ProductRow title="Productos Copa 2026">
+              {CATALOG.map(product =>
                 product.renderCard
                   ? <div key={product.id} style={{ flexShrink: 0, scrollSnapAlign: "start" }}>{product.renderCard(data, 250)}</div>
                   : <CatalogCard key={product.id} product={product} data={data} width={250} />
               )}
             </ProductRow>
 
-            {/* Row 3 — Aumente suas chances */}
-            <ProductRow title="AUMENTE SUAS CHANCES NO SORTEIO" accent>
-              {CATALOG.filter(p => p.section === "sorteio").map(product =>
-                product.renderCard
-                  ? <div key={product.id} style={{ flexShrink: 0, scrollSnapAlign: "start" }}>{product.renderCard(data, 240)}</div>
-                  : <CatalogCard key={product.id} product={product} data={data} width={240} />
-              )}
-            </ProductRow>
-
             {/* Support */}
-            <div style={{ textAlign: "center", marginTop: 4 }}>
+            <div style={{ textAlign: "center", marginBottom: 20 }}>
               <a
-                href="https://api.whatsapp.com/send?phone=559294621319&text=Ol%C3%A1%2C%20preciso%20de%20ajuda%20com%20minha%20compra."
+                href="https://api.whatsapp.com/send?phone=559294621319&text=Hola%2C%20necesito%20ayuda%20con%20mi%20compra."
                 target="_blank" rel="noopener noreferrer"
                 style={{ color: "rgba(0,35,149,.5)", fontSize: 13, textDecoration: "underline", fontWeight: 500 }}
               >
-                Problema com algum produto? Fale com o suporte
+                ¿Problemas con algún producto? Contactá al soporte
               </a>
+            </div>
+
+            {/* Aviso sorteo */}
+            <div style={{
+              background: "linear-gradient(135deg,#002395,#0040CC)",
+              borderRadius: 16, padding: "16px 20px",
+              display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
+              boxShadow: "0 4px 16px rgba(0,35,149,.3)", textAlign: "center",
+            }}>
+              <span style={{ fontSize: 24 }}>🏆⚽</span>
+              <p style={{ margin: 0, color: "#fff", fontSize: 15, fontWeight: 700, lineHeight: 1.4 }}>
+                ¡Ya estás participando del sorteo de{" "}
+                <span style={{ color: "#74ACDF" }}>$1.000</span>!
+              </p>
+              <p style={{ margin: 0, color: "rgba(255,255,255,.7)", fontSize: 13, fontWeight: 600 }}>
+                Sorteo el <span style={{ color: "#74ACDF", fontWeight: 800 }}>11/06/2026</span>
+              </p>
             </div>
           </>
         )}
@@ -788,6 +748,7 @@ function MembrosContent() {
 
         .product-row-scroll {
           display: flex;
+          align-items: flex-start;
           gap: 20px;
           overflow-x: auto;
           padding-bottom: 12px;
@@ -824,6 +785,12 @@ function MembrosContent() {
             font-size: 20px !important;
             letter-spacing: .02em !important;
           }
+          .poster-card-outer { width: 100% !important; }
+        }
+        @keyframes borderSpin {
+          0%   { background-position: 0% 50%; }
+          50%  { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
     </main>
